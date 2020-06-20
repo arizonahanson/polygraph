@@ -27,7 +27,7 @@ testArgs <- commandArgs()
 if (length(testArgs) == 8){args  <- commandArgs()}
 length (commandArgs)
 # [3] is pitch shift (real), 
-# [4] filtering diff witdth (real), 
+# [4] filtering diff width (real), 
 # [5] type of plot,
 # [6] is min number of data points for note to be included in graph (integer)
 # [7] is h in vioplot which determines the smoothing - around 1.5 looks good (real)
@@ -40,14 +40,14 @@ if (args[8] == "justD") {temperament <- c(0,+4,-14,-2,+2,-16,-4,-12)}
 
 #############################
 # read data from file "rtest.txt" in current working directory 
-rawdata <- read.table("rtest.txt", header=TRUE) 
+rawdata <- read.table("export.txt", header=TRUE) 
 
 #############################
 # Trying some Filtering using value of cents from command line argument
 # remove data where cosectutive values of Pitch are > diff semitones different 
 # and put into only pitch data a new array "z" ------ 0.20 is 20 cents
 # difference from command line is 4th item as string in cents 0 = no filtering
-diff <- (as.real(args[4]) / 100)
+diff <- (as.double(args[4]) / 100)
 if(diff == 0) 
 	{z <- rawdata$Pitch}
 if(diff > 0)
@@ -63,7 +63,7 @@ if(diff > 0)
 #############################
 # Not at A = 440? convert pitch in Hz to semitone and shift all values
 # Pitch entered from command line is 3rd item as string
-pitch <- as.real(args[3])
+pitch <- as.double(args[3])
 if (pitch != 440) {z <- (z - (log2(pitch/440)*12.00))}
 # or if you want to hard code a shift in this file do this
 # z <- z - 12.00 # plots high D whistle
@@ -129,37 +129,37 @@ if (length(B5) < minsize)	{ B5 <- 0  }
 
 #############################
 # output graph to JPEG file rather than within R console
-jpeg("Polygraph.jpg", width = 800, height = 600, units = "px",)
+jpeg("Polygraph.jpg", width = 1024, height = 768, units = "px",)
 
-
+# 8 HCL colors
+mycolors <- c("#80C990", "#50CACD", "#A3B8EF", "#CCACED", "#E6A3DC", "#EFA6A2", "#E0AF85", "#C8C874")
 #############################
 # draw a "violin" plot of each note 
 # Load packages sm, vioplot
 if (args[5] == "vioplot") 
 {
-H <- as.real(args[7])
+H <- as.double(args[7])
 library(sm)
 library(vioplot)
-vioplot(D4, E4, Fs4, G4, A4, B4, C5, Cs5, D5, E5, Fs5, G5, A5, B5, names=c("D4", "E4", "F#4", "G4", "A4", "B4", "C5", "C#5", "D5", "E5", "F#5", "G5", "A5", "B5"), col="gold", h=H)
+vioplot(D4, E4, Fs4, G4, A4, B4, C5, Cs5, D5, E5, Fs5, G5, A5, B5, names=c("D4", "E4", "F#4", "G4", "A4", "B4", "C5", "C#5", "D5", "E5", "F#5", "G5", "A5", "B5"), col=mycolors, h=H)
 }
 #############################
 # draw a boxplot
 if (args[5] == "boxplot") 
 {
-boxplot(D4, E4, Fs4, G4, A4, B4, C5, Cs5, D5, E5, Fs5, G5, A5, B5, varwidth = TRUE, outline = FALSE, names=c("D4", "E4", "F#4", "G4", "A4", "B4", "C5", "C#5", "D5", "E5", "F#5", "G5", "A5", "B5"), col="gold", range = 0)
+boxplot(D4, E4, Fs4, G4, A4, B4, C5, Cs5, D5, E5, Fs5, G5, A5, B5, varwidth = TRUE, outline = FALSE, names=c("D4", "E4", "F#4", "G4", "A4", "B4", "C5", "C#5", "D5", "E5", "F#5", "G5", "A5", "B5"), col=mycolors, range = 0)
 }
 
 #############################
 # label the graph
-title(xlab="Note", ylab="Cents difference from Chosen Temperament", main="Pitch of Irish Flute
-")
+title(xlab="Pitch", ylab="Cents deviation from equal temperament", main="Tartini-R Polygraph", sub="Starlight flute")
 # add horizontal gridlines
 axis(2, tck = 1, col = "grey", lty = "dotted")
 
 #############################
 # write median values of notes to a file for import to MSExcel or similar
 meds <- c(median(D4), median(E4), median(Fs4), median(G4), median(A4), median(B4), median(C5), median(Cs5), median(D5), median(E5), median(Fs5), median(G5), median(A5), median(B5))
-write(round(meds, digits = 0), file = "Rout.txt", ncolumns = 1, append = FALSE, sep = ",")
+write(round(meds, digits = 0), file = "medians.txt", ncolumns = 1, append = FALSE, sep = ",")
 
 #############################
 # close jpeg file  
